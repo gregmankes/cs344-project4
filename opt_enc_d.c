@@ -107,6 +107,9 @@ void send_file(int new_fd, char * message, int message_length){
 			_Exit(2);
 		}
 	}
+	char buff[100];
+	memset(buff, 0, sizeof(buff));
+	recv(new_fd, buff, sizeof(buff), 0);
 }
 
 int handshake(int new_fd){
@@ -212,6 +215,8 @@ void handle_request(int new_fd){
 	// get the key
 	char * key = recv_file(new_fd, key_length);
 	encrypt(message, key, message_length);
+	// send back the file
+	send_file(new_fd, message, message_length);
 	// free the key and message
 	free(key);
 	free(message);
