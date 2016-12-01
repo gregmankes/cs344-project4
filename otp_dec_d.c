@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 /*******************************************************************************
  * struct addrinfo * create_address_info(char*)
@@ -99,7 +100,6 @@ void listen_socket(int sockfd){
 void send_file(int new_fd, char * message, int message_length){
 	int nwrote = 0;
 	int i = 0;
-	printf("Sending file\n");
 	for (; i < message_length; i+=nwrote){
 		nwrote = write(new_fd, message, message + i);
 		if(nwrote < 0){
@@ -115,7 +115,6 @@ void send_file(int new_fd, char * message, int message_length){
 int handshake(int new_fd){
 	char buffer[100];
 	memset(buffer, 0, sizeof(buffer));
-	printf("Verifying the client\n");
 	recv(new_fd, buffer, sizeof(buffer),0);
 	if(strcmp(buffer, "opt_dec") == 0){
 		return 1;
@@ -123,11 +122,9 @@ int handshake(int new_fd){
 	return 0;
 }
 
-char * recv_file(int new_fd, int message_length){
-	char * to_receive = malloc(message_length * sizeof(char));
+void recv_file(int new_fd, int message_length, char * to_receive){
 	int nread = 0;
 	int i = 0;
-	printf("Receiving the file\n");
 	for(; i< message_length; i+= nread){
 		nread = read(new_fd, to_receive + i, message_length -1);
 		if(nread < 0){
@@ -138,10 +135,9 @@ char * recv_file(int new_fd, int message_length){
 	// echo finished response
 	char * finished = "opt_dec_d f";
 	send(new_fd, finished, strlen(finished),0);
-	return to_receive;
 }
 
-void decrypt(char * message, char * key, int message_length){
+void decrypt_message(char * message, char * key, int message_length){
 	int i = 0;
 	int message_num;
 	int key_num;
@@ -196,33 +192,30 @@ void handle_request(int new_fd){
 	// get the length of how long the file is
 	char buffer[1000];
 	memset(buffer, 0, sizeof(buffer));
-	printf("getting the length of the file\n");
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int message_length = atoi(buffer);
 	// send the length of the file back
-	printf("The length of the file is %d\n", message_length);
-	printf("sending back the length of the file\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the length of the key
 	memset(buffer, 0, sizeof(buffer));
-	printf("getting the length of the key\n");
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int key_length = atoi(buffer);
-	printf("The length of the key is %d\n", key_length)
 	// send the length of the key back
-	printf("Sending the length of the key back\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = recv_file(new_fd, message_length);
+	char * message = (char *)malloc((long)message_length);
+	recv_file(new_fd, message_length, message);
 	// get the key
-	char * key = recv_file(new_fd, key_length);
-	decrypt(message, key, message_length);
+	char * key = (char *)malloc((long)key_length+1);
+	recv_file(new_fd, key_length+1, key);
+	sleep(1);
+	decrypt_message(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
-	free(key);
-	free(message);
-	_Exit(0);
+	//free(message);
+	//free(key);
+	exit(0);
 }
 
 
@@ -248,7 +241,7 @@ void wait_for_connection(int sockfd){
 		// get the address size
 		addr_size = sizeof(their_addr);
 		// accept a new client
-		new_fd = accept(sockfd, (struct addrinfo *)&their_addr, &addr_size);
+		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
 		// if there is no new client keep waiting
 		if(new_fd == -1){
 			fprintf(stderr, "Error in accepting connection\n");

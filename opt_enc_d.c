@@ -100,7 +100,6 @@ void listen_socket(int sockfd){
 void send_file(int new_fd, char * message, int message_length){
 	int nwrote = 0;
 	int i = 0;
-	printf("Sending file\n");
 	for (; i < message_length; i+=nwrote){
 		nwrote = write(new_fd, message, message + i);
 		if(nwrote < 0){
@@ -116,7 +115,6 @@ void send_file(int new_fd, char * message, int message_length){
 int handshake(int new_fd){
 	char buffer[100];
 	memset(buffer, 0, sizeof(buffer));
-	printf("Verifying the client\n");
 	recv(new_fd, buffer, sizeof(buffer),0);
 	if(strcmp(buffer, "opt_enc") == 0){
 		return 1;
@@ -127,7 +125,6 @@ int handshake(int new_fd){
 void recv_file(int new_fd, int message_length, char * to_receive){
 	int nread = 0;
 	int i = 0;
-	printf("Receiving the file\n");
 	for(; i< message_length; i+= nread){
 		nread = read(new_fd, to_receive + i, message_length -1);
 		if(nread < 0){
@@ -195,21 +192,15 @@ void handle_request(int new_fd){
 	// get the length of how long the file is
 	char buffer[1000];
 	memset(buffer, 0, sizeof(buffer));
-	printf("getting the length of the file\n");
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int message_length = atoi(buffer);
 	// send the length of the file back
-	printf("The length of the file is %d\n", message_length);
-	printf("sending back the length of the file\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the length of the key
 	memset(buffer, 0, sizeof(buffer));
-	printf("getting the length of the key\n");
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int key_length = atoi(buffer);
 	// send the length of the key back
-	printf("The length of the key is %d\n",key_length);
-	printf("Sending the length of the key back\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
 	char * message = (char *)malloc((long)message_length);
