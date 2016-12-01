@@ -139,7 +139,7 @@ char * recv_file(int new_fd, int message_length){
 	// echo finished response
 	char * finished = "opt_enc_d f";
 	send(new_fd, finished, strlen(finished),0);
-	return to_receive;
+	return to_receive; 
 }
 
 void encrypt(char * message, char * key, int message_length){
