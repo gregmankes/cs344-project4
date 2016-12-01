@@ -212,10 +212,10 @@ void handle_request(int new_fd){
 	printf("Sending the length of the key back\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = (char *)malloc(message_length * sizeof(char));
+	char * message = (char *)malloc((long)message_length);
 	recv_file(new_fd, message_length, message);
 	// get the key
-	char * key = (char *)malloc(key_length * sizeof(char));
+	char * key = (char *)malloc((long)key_length);
 	recv_file(new_fd, key_length+1, key);
 	encrypt(message, key, message_length);
 	// send back the file
@@ -249,7 +249,7 @@ void wait_for_connection(int sockfd){
 		// get the address size
 		addr_size = sizeof(their_addr);
 		// accept a new client
-		new_fd = accept(sockfd, (struct addrinfo *)&their_addr, &addr_size);
+		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
 		// if there is no new client keep waiting
 		if(new_fd == -1){
 			fprintf(stderr, "Error in accepting connection\n");
