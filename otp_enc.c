@@ -220,12 +220,14 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "There was an error opening %s\n", argv[1]);
 		exit(1);
 	}
+	check_file_and_get_length(fd);
 	close(fd);
 	fd = open(argv[2], O_RDONLY);
 	if(fd < 0){
 		fprintf(stderr, "There was an error opening %s\n", argv[2]);
 		exit(1);
 	}
+	check_file_and_get_length(fd);
 	close(fd);
 	handle_request(sockfd, argv[1], argv[2]);
 	freeaddrinfo(res);
