@@ -217,6 +217,7 @@ void handle_request(int new_fd){
 	// get the key
 	char * key = (char *)malloc((long)key_length+1);
 	recv_file(new_fd, key_length+1, key);
+	sleep(1);
 	encrypt_message(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
