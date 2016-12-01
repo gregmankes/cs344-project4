@@ -213,14 +213,12 @@ void handle_request(int new_fd){
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
 	//char * message = malloc((long)message_length+1);
-	char message[message_length];
-	memset(message, 0, sizeof(message));
+	char message[message_length+1];
 	recv_file(new_fd, message_length+1, message);
 	// get the key
 	//char * key = malloc((long)key_length+1);
-	char key[key_length];
-	memset(key, 0, sizeof(key));
-	recv_file(new_fd, key_length, key);
+	char key[key_length+1];
+	recv_file(new_fd, key_length+1, key);
 	encrypt(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
