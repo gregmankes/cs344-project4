@@ -221,8 +221,8 @@ void handle_request(int new_fd){
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
-	free(message);
-	free(key);
+	//free(message);
+	//free(key);
 	exit(0);
 }
 
