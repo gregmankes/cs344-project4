@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 /*******************************************************************************
  * struct addrinfo * create_address_info(char*)

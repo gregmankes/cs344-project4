@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
 /*******************************************************************************
  * struct addrinfo * create_address_info(char*)
  * 
@@ -267,7 +268,7 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "Usage: opt_enc filename keyname portnumber\n");
 		exit(1);
 	}
-	struct addrinfo * res = create_address_info(argv[4]);
+	struct addrinfo * res = create_address_info(argv[3]);
 	int sockfd = create_socket(res);
 	connect_socket(sockfd, res);
 	handle_request(sockfd, argv[1], argv[2]);
