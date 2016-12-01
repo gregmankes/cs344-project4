@@ -201,6 +201,7 @@ void handle_request(int new_fd){
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int message_length = atoi(buffer);
 	// send the length of the file back
+	printf("The length of the file is %d\n", message_length);
 	printf("sending back the length of the file\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the length of the key
@@ -209,7 +210,8 @@ void handle_request(int new_fd){
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int key_length = atoi(buffer);
 	// send the length of the key back
-	printf("Sending the length of the key back");
+	printf("The length of the key is %d\n",key_length);
+	printf("Sending the length of the key back\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
 	char * message = recv_file(new_fd, message_length);
