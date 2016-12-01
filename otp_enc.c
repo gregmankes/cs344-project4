@@ -215,6 +215,18 @@ int main(int argc, char *argv[]){
 	struct addrinfo * res = create_address_info(argv[3]);
 	int sockfd = create_socket(res);
 	connect_socket(sockfd, res);
+	int fd = open(argv[1], O_RDONLY);
+	if(fd < 0){
+		fprintf(stderr, "There was an error opening %s\n", argv[1]);
+		exit(1);
+	}
+	close(fd);
+	fd = open(argv[2], O_RDONLY);
+	if(fd < 0){
+		fprintf(stderr, "There was an error opening %s\n", argv[2]);
+		exit(1);
+	}
+	close(fd);
 	handle_request(sockfd, argv[1], argv[2]);
 	freeaddrinfo(res);
 	close(sockfd);
