@@ -89,7 +89,7 @@ void send_file(int new_fd, char * message, int message_length){
 
 int handshake(int sockfd){
 	//	printf("Verifying identity with daemon\n");
-	char * identity = "opt_enc";
+	char * identity = "opt_dec";
 	send(sockfd, identity, strlen(identity),0);
 	// get the response from the server
 	char buffer[100];
@@ -116,7 +116,7 @@ char * recv_file(int new_fd, int message_length){
 		}
 	}
 	// echo finished response
-	char * finished = "opt_enc_d f";
+	char * finished = "opt_dec_d f";
 	send(new_fd, finished, strlen(finished),0);
 	return to_receive;
 }
