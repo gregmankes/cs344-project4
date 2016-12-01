@@ -124,8 +124,7 @@ int handshake(int new_fd){
 	return 0;
 }
 
-char * recv_file(int new_fd, int message_length){
-	char * to_receive = malloc(message_length * sizeof(char));
+void recv_file(int new_fd, int message_length, char * to_receive){
 	int nread = 0;
 	int i = 0;
 	printf("Receiving the file\n");
@@ -139,7 +138,6 @@ char * recv_file(int new_fd, int message_length){
 	// echo finished response
 	char * finished = "opt_enc_d f";
 	send(new_fd, finished, strlen(finished),0);
-	return to_receive; 
 }
 
 void encrypt(char * message, char * key, int message_length){
@@ -214,9 +212,11 @@ void handle_request(int new_fd){
 	printf("Sending the length of the key back\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = recv_file(new_fd, message_length);
+	char * message = malloc((long)message_length);
+	recv_file(new_fd, message_length, message);
 	// get the key
-	char * key = recv_file(new_fd, key_length);
+	char * key = malloc((long)key_length);
+	recv_file(new_fd, key_length, key);
 	encrypt(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
