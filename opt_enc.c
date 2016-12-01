@@ -250,9 +250,9 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	printf("Receiving the encrypted file\n");
 	char * encrypted = recv_file(sockfd, file_length);
 	printf("%s", encrypted);
-	free(encrypted);
-	free(message);
-	free(key);
+	/* free(encrypted); */
+	/* free(message); */
+	/* free(key); */
 }
 
 /*******************************************************************************
@@ -274,5 +274,6 @@ int main(int argc, char *argv[]){
 	handle_request(sockfd, argv[1], argv[2]);
 	freeaddrinfo(res);
 	close(sockfd);
+	exit(0);
 }
 
