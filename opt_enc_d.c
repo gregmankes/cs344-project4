@@ -212,17 +212,17 @@ void handle_request(int new_fd){
 	printf("Sending the length of the key back\n");
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = malloc(message_length * sizeof(char));
+	char * message = (char *)malloc(message_length * sizeof(char));
 	recv_file(new_fd, message_length, message);
 	// get the key
-	char * key = malloc(key_length * sizeof(char));
+	char * key = (char *)malloc(key_length * sizeof(char));
 	recv_file(new_fd, key_length+1, key);
 	encrypt(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
 	free(key);
-	//free(message);
+	free(message);
 	_Exit(0);
 }
 
