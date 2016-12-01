@@ -215,7 +215,7 @@ void handle_request(int new_fd){
 	//char * message = malloc((long)message_length+1);
 	char message[message_length];
 	memset(message, 0, sizeof(message));
-	recv_file(new_fd, message_length, message);
+	recv_file(new_fd, message_length+1, message);
 	// get the key
 	//char * key = malloc((long)key_length+1);
 	char key[key_length];
