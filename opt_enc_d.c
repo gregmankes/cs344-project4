@@ -216,14 +216,13 @@ void handle_request(int new_fd){
 	char message[message_length+1];
 	recv_file(new_fd, message_length+1, message);
 	// get the key
-	//char * key = malloc((long)key_length+1);
-	char key[key_length+1];
+	char * key = malloc(key_length * sizeof(char));
 	recv_file(new_fd, key_length+1, key);
 	encrypt(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
-	//free(key);
+	free(key);
 	//free(message);
 	_Exit(0);
 }
