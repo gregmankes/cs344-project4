@@ -69,55 +69,34 @@ void connect_socket(int sockfd, struct addrinfo * res){
 }
 
 
-
-void send_file(int new_fd, char * message, int message_length){
-	int nwrote = 0;
-	int i = 0;
-	//printf("Sending file\n");
-	for (; i < message_length; i+=nwrote){
-		nwrote = write(new_fd, message, message + i);
-		if(nwrote < 0){
-			fprintf(stderr, "Error in writing to socket\n");
-			_Exit(2);
+void sendFile(int fd, int sockfd) {
+	// keep track of how many bytes read and wrote
+	int nread;
+	int nwrite;
+	// create a buffer for sending/receiving
+	char buffer[1024];
+	// send the file
+	while (1) {
+		// grab data from the file
+		nread = read(fd, buffer, sizeof(buffer));
+		if (nread == 0) {
+			// done, close fd
+			close(fd);
+			break;
+		}
+		//send the chunk
+		for (int i = 0; i < nread; i += nwrite) {
+			//keep sending chunks until all sent
+			nwrite = write(sockfd, buffer + i, nread - i);
+			if (nwrite < 0) {
+				fprintf(stderr, "Error writing to socket\n");
+				exit(1);
+			}
 		}
 	}
-	char buff[100];
-	memset(buff, 0, sizeof(buff));
-	recv(new_fd, buff, sizeof(buff), 0);
-}
-
-void sendFile(int fd, int sockfd) {
-    long length;        //length of the file described by fd
-    int slength;        //length of the string version of length
-    char len_echo[16];  //the length string that the server got from us
-    int nread;          //number of bytes read
-    int nwrite;         //number of bytes written
-    char buf[1024];
-    
-    //send the file
-    while (1) {
-        //grab a chunk from the file
-        nread = read(fd, buf, sizeof(buf));
-        if (nread == 0) {
-            //we're done reading, so wrap things up
-            close(fd);
-            break;
-        }
-        //send the chunk
-        for (int i = 0; i < nread; i += nwrite) {
-            //keep sending subchunks until the entire chunk is sent
-            nwrite = write(sockfd, buf + i, nread - i);
-            if (nwrite < 0) {
-                perror("client write");
-                exit(1);
-            }
-        }
-    }
-    
-    memset(buf, '\0', 64);
-    
-    //read the confirmation from the daemon
-    nread = read(sockfd, buf, 63);
+	memset(buffer, '\0', sizeof(buffer));
+	//read the confirmation from daemon
+	nread = read(sockfd, buffer, sizeof(buffer));
 }
 
 int handshake(int sockfd){
@@ -202,26 +181,12 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	memset(key_length_s, 0, sizeof(key_length_s));
 	sprintf(file_length_s, "%d", file_length);
 	sprintf(key_length_s, "%d", key_length);
-	//printf("Sending and receiving lengths of file and key to daemon\n");
 	// Sending the length of the file and echoing back
 	send(sockfd, file_length_s, strlen(file_length_s), 0);
 	recv(sockfd, file_length_s, sizeof(file_length_s), 0);
 	// sending the length of the key and echoing back
 	send(sockfd, key_length_s, strlen(key_length_s), 0);
 	recv(sockfd, key_length_s, sizeof(key_length_s), 0);
-	/* // create the key and file strings */
-	/* char * message = malloc(file_length * sizeof(char)); */
-	/* char * key = malloc(key_length * sizeof(char)); */
-	/* memset(message, 0, sizeof(message)); */
-	/* memset(key, 0, sizeof(key)); */
-	/* //printf("Loading the file into memory\n"); */
-	/* FILE * message_fd = fopen(filename, "r"); */
-	/* fread(message, 1, file_length, message_fd); */
-	/* fclose(message_fd); */
-	/* //printf("Loading the key into memory\n"); */
-	/* FILE * key_file = fopen(keyname, "r"); */
-	/* fread(key, 1, key_lengt h, key_file); */
-	/* fclose(key_file); */
 	int filefd = open(filename, O_RDONLY);
 	sendFile(filefd, sockfd);
 	int keyfd = open(keyname,O_RDONLY);
@@ -231,8 +196,6 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	char * encrypted = recv_file(sockfd, file_length);
 	printf("%s", encrypted);
 	free(encrypted);
-	/* free(message); */
-	/* free(key); */
 }
 
 /*******************************************************************************
