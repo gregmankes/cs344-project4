@@ -234,10 +234,10 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	close(filefd);
 	close(keyfd);
 	// get the encrypted file back
-	char * encrypted = recv_file(sockfd, file_length);
+	char * decrypted = recv_file(sockfd, file_length);
 	// print it and free the space
-	printf("%s", encrypted);
-	free(encrypted);
+	printf("%s", decrypted);
+	free(decrypted);
 }
 
 /*******************************************************************************
