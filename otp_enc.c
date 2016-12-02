@@ -92,7 +92,7 @@ void sendFile(int fd, int sockfd) {
     char len_echo[16];  //the length string that the server got from us
     int nread;          //number of bytes read
     int nwrite;         //number of bytes written
-    char buf[BUFSIZE];
+    char buf[1024];
     
     //get the length of the input files
     length = lseek(fd, 0, SEEK_END);
