@@ -86,6 +86,62 @@ void send_file(int new_fd, char * message, int message_length){
 	recv(new_fd, buff, sizeof(buff), 0);
 }
 
+void sendFile(int fd, int sockfd) {
+    long length;        //length of the file described by fd
+    int slength;        //length of the string version of length
+    char len_echo[16];  //the length string that the server got from us
+    int nread;          //number of bytes read
+    int nwrite;         //number of bytes written
+    char buf[BUFSIZE];
+    
+    //get the length of the input files
+    length = lseek(fd, 0, SEEK_END);
+    //set the file pointers back to the beginning of the files
+    lseek(fd, 0, SEEK_SET);
+    
+    memset(len_echo, '\0', sizeof(len_echo));
+    
+    //tell the daemon how big the text file is
+    slength = sprintf(buf, "%ld", length);
+    write(sockfd, buf, slength);
+    read(sockfd, len_echo, sizeof(len_echo));
+    if (strcmp(buf, len_echo) != 0) {
+        perror("length discrepancy");
+        exit(1);
+    }
+    
+    //send the file
+    while (1) {
+        //grab a chunk from the file
+        nread = read(fd, buf, sizeof(buf));
+        if (nread == 0) {
+            //we're done reading, so wrap things up
+            close(fd);
+            break;
+        }
+        //send the chunk
+        for (int i = 0; i < nread; i += nwrite) {
+            //keep sending subchunks until the entire chunk is sent
+            nwrite = write(sockfd, buf + i, nread - i);
+            if (nwrite < 0) {
+                perror("client write");
+                exit(1);
+            }
+        }
+    }
+    
+    memset(buf, '\0', 64);
+    
+    //read the confirmation from the daemon
+    nread = read(sockfd, buf, 63);
+    if (nread < 0) {
+        perror("client read confirm");
+    }
+    if (strcmp(buf, "f recv") != 0) {
+        perror("arrival verification");
+        exit(1);
+    }
+}
 
 int handshake(int sockfd){
 	//	printf("Verifying identity with daemon\n");
@@ -189,8 +245,14 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	FILE * key_file = fopen(keyname, "r");
 	fread(key, 1, key_length, key_file);
 	fclose(key_file);
-	send_file(sockfd, message, file_length);
-	send_file(sockfd, key, key_length);
+	//send_file(sockfd, message, file_length);
+	//send_file(sockfd, key, key_length);
+	int filefd = open(filename, O_RDONLY);
+	sendFile(filefd, sockfd);
+	int keyfd = open(filename,O_RDONLY);
+	sendFile(keyfd, sockfd);
+	close(filefd);
+	close(keyfd);
 	//printf("Receiving the encrypted file\n");
 	char * encrypted = recv_file(sockfd, file_length);
 	printf("%s", encrypted);
