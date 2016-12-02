@@ -205,7 +205,7 @@ void handle_request(int new_fd){
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
 	char * message = recv_file(new_fd, message_length);
-	printf("%s\n");
+	printf("%s\n", message);
 	// get the key
 	char * key = recv_file(new_fd, key_length);
 	sleep(1);
