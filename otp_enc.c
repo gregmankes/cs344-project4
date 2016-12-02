@@ -226,7 +226,7 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	//send_file(sockfd, key, key_length);
 	int filefd = open(filename, O_RDONLY);
 	sendFile(filefd, sockfd);
-	int keyfd = open(filename,O_RDONLY);
+	int keyfd = open(keyname,O_RDONLY);
 	sendFile(keyfd, sockfd);
 	close(filefd);
 	close(keyfd);
