@@ -127,7 +127,7 @@ char * recv_file(int new_fd, int message_length){
 	char * to_receive = malloc(message_length * sizeof(char));
 	memset(to_receive, '\0', sizeof(to_receive));
 	for(; i< message_length; i+= nread){
-		nread = read(new_fd, to_receive + i, message_length -1);
+		nread = read(new_fd, to_receive + i, message_length -i);
 		if(nread < 0){
 			fprintf(stderr, "Error in receiving file\n");
 			_Exit(2);
@@ -206,7 +206,6 @@ void handle_request(int new_fd){
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
 	char * message = recv_file(new_fd, message_length);
-	printf("%s", message);
 	// get the key
 	char * key = recv_file(new_fd, key_length);
 	sleep(1);
