@@ -116,7 +116,7 @@ char * recv_file(int new_fd, int message_length){
 		}
 	}
 	// echo finished response
-	char * finished = "opt_dec_d f";
+	char * finished = "opt_enc_d f";
 	send(new_fd, finished, strlen(finished),0);
 	return to_receive;
 }
@@ -194,9 +194,9 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	//printf("Receiving the encrypted file\n");
 	char * encrypted = recv_file(sockfd, file_length);
 	printf("%s", encrypted);
-	/* free(encrypted); */
-	/* free(message); */
-	/* free(key); */
+	free(encrypted);
+	free(message);
+	free(key);
 }
 
 /*******************************************************************************

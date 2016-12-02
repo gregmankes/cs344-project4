@@ -5,8 +5,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <arpa/inet.h>
-#include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
@@ -37,6 +35,7 @@ struct addrinfo * create_address_info(char * port){
 	
 	return res;
 }
+
 
 /*******************************************************************************
  * int create_socket(struct addrinfo *)
@@ -97,7 +96,7 @@ void listen_socket(int sockfd){
 }
 
 
-void send_file(int new_fd, char * message, int message_length){
+void send_file(int new_fd, const char * message, int message_length){
 	int nwrote = 0;
 	int i = 0;
 	for (; i < message_length; i+=nwrote){
@@ -107,13 +106,13 @@ void send_file(int new_fd, char * message, int message_length){
 			_Exit(2);
 		}
 	}
-	char buff[100];
+	char buff[20];
 	memset(buff, 0, sizeof(buff));
 	recv(new_fd, buff, sizeof(buff), 0);
 }
 
 int handshake(int new_fd){
-	char buffer[100];
+	char buffer[20];
 	memset(buffer, 0, sizeof(buffer));
 	recv(new_fd, buffer, sizeof(buffer),0);
 	if(strcmp(buffer, "opt_dec") == 0){
@@ -122,9 +121,11 @@ int handshake(int new_fd){
 	return 0;
 }
 
-void recv_file(int new_fd, int message_length, char * to_receive){
+char * recv_file(int new_fd, int message_length){
 	int nread = 0;
 	int i = 0;
+	char * to_receive = malloc(message_length * sizeof(char));
+	memset(to_receive, '\0', sizeof(to_receive));
 	for(; i< message_length; i+= nread){
 		nread = read(new_fd, to_receive + i, message_length -i);
 		if(nread < 0){
@@ -133,11 +134,12 @@ void recv_file(int new_fd, int message_length, char * to_receive){
 		}
 	}
 	// echo finished response
-	char * finished = "opt_dec_d f";
+	char * finished = "opt_enc_d f";
 	send(new_fd, finished, strlen(finished),0);
+	return to_receive;
 }
 
-void decrypt_message(char * message, char * key, int message_length){
+void encrypt_message(char * message, char * key, int message_length){
 	int i = 0;
 	int message_num;
 	int key_num;
@@ -190,7 +192,7 @@ void handle_request(int new_fd){
 	char valid[] = "Valid";
 	send(new_fd, valid, strlen(valid), 0);
 	// get the length of how long the file is
-	char buffer[1000];
+	char buffer[10];
 	memset(buffer, 0, sizeof(buffer));
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int message_length = atoi(buffer);
@@ -203,18 +205,16 @@ void handle_request(int new_fd){
 	// send the length of the key back
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = (char *)malloc((long)message_length);
-	recv_file(new_fd, message_length, message);
+	char * message = recv_file(new_fd, message_length);
 	// get the key
-	char * key = (char *)malloc((long)key_length+1);
-	recv_file(new_fd, key_length+1, key);
+	char * key = recv_file(new_fd, key_length);
 	sleep(1);
-	decrypt_message(message, key, message_length);
+	encrypt_message(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
-	//free(message);
-	//free(key);
+	free(message);
+	free(key);
 	exit(0);
 }
 
@@ -285,7 +285,7 @@ int main(int argc, char *argv[]){
 	struct addrinfo * res = create_address_info(argv[1]);
 	int sockfd = create_socket(res);
 	bind_socket(sockfd, res);
-	listen_socket(sockfd);
+   	listen_socket(sockfd);
 	wait_for_connection(sockfd);
 	freeaddrinfo(res);
 }
