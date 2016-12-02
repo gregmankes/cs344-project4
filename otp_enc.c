@@ -209,33 +209,30 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	// sending the length of the key and echoing back
 	send(sockfd, key_length_s, strlen(key_length_s), 0);
 	recv(sockfd, key_length_s, sizeof(key_length_s), 0);
-	// create the key and file strings
-	char * message = malloc(file_length * sizeof(char));
-	char * key = malloc(key_length * sizeof(char));
-	memset(message, 0, sizeof(message));
-	memset(key, 0, sizeof(key));
-	//printf("Loading the file into memory\n");
-	FILE * message_fd = fopen(filename, "r");
-	fread(message, 1, file_length, message_fd);
-	fclose(message_fd);
-	//printf("Loading the key into memory\n");
-	FILE * key_file = fopen(keyname, "r");
-	fread(key, 1, key_length, key_file);
-	fclose(key_file);
-	//send_file(sockfd, message, file_length);
-	//send_file(sockfd, key, key_length);
+	/* // create the key and file strings */
+	/* char * message = malloc(file_length * sizeof(char)); */
+	/* char * key = malloc(key_length * sizeof(char)); */
+	/* memset(message, 0, sizeof(message)); */
+	/* memset(key, 0, sizeof(key)); */
+	/* //printf("Loading the file into memory\n"); */
+	/* FILE * message_fd = fopen(filename, "r"); */
+	/* fread(message, 1, file_length, message_fd); */
+	/* fclose(message_fd); */
+	/* //printf("Loading the key into memory\n"); */
+	/* FILE * key_file = fopen(keyname, "r"); */
+	/* fread(key, 1, key_lengt h, key_file); */
+	/* fclose(key_file); */
 	int filefd = open(filename, O_RDONLY);
 	sendFile(filefd, sockfd);
 	int keyfd = open(keyname,O_RDONLY);
 	sendFile(keyfd, sockfd);
 	close(filefd);
 	close(keyfd);
-	//printf("Receiving the encrypted file\n");
 	char * encrypted = recv_file(sockfd, file_length);
 	printf("%s", encrypted);
 	free(encrypted);
-	free(message);
-	free(key);
+	/* free(message); */
+	/* free(key); */
 }
 
 /*******************************************************************************
