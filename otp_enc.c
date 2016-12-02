@@ -193,7 +193,7 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	send_file(sockfd, key, key_length);
 	//printf("Receiving the encrypted file\n");
 	char * encrypted = recv_file(sockfd, file_length);
-	printf("%s", encrypted);
+	printf("%s\n", encrypted);
 	free(encrypted);
 	free(message);
 	free(key);
