@@ -188,7 +188,7 @@ void handle_request(int new_fd){
 	char valid[] = "Valid";
 	send(new_fd, valid, strlen(valid), 0);
 	// get the length of how long the file is
-	char buffer[1000];
+	char buffer[10];
 	memset(buffer, 0, sizeof(buffer));
 	recv(new_fd, buffer, sizeof(buffer), 0);
 	int message_length = atoi(buffer);
