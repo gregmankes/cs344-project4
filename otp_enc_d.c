@@ -145,7 +145,7 @@ void encrypt_message(char * message, char * key, int message_length){
 	int key_num;
 	int result_num;
 	int alphabet = 27; // because of newline
-	for (; i < message_length; i++){
+	for (; i < message_length-1; i++){
 		// ignore newlines
 		if (message[i] != '\n'){
 			// convert the characters of key[i] and message[i]
