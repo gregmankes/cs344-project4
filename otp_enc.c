@@ -94,22 +94,6 @@ void sendFile(int fd, int sockfd) {
     int nwrite;         //number of bytes written
     char buf[1024];
     
-    //get the length of the input files
-    length = lseek(fd, 0, SEEK_END);
-    //set the file pointers back to the beginning of the files
-    lseek(fd, 0, SEEK_SET);
-    
-    memset(len_echo, '\0', sizeof(len_echo));
-    
-    //tell the daemon how big the text file is
-    slength = sprintf(buf, "%ld", length);
-    write(sockfd, buf, slength);
-    read(sockfd, len_echo, sizeof(len_echo));
-    if (strcmp(buf, len_echo) != 0) {
-        perror("length discrepancy");
-        exit(1);
-    }
-    
     //send the file
     while (1) {
         //grab a chunk from the file
