@@ -118,13 +118,6 @@ void sendFile(int fd, int sockfd) {
     
     //read the confirmation from the daemon
     nread = read(sockfd, buf, 63);
-    if (nread < 0) {
-        perror("client read confirm");
-    }
-    if (strcmp(buf, "f recv") != 0) {
-        perror("arrival verification");
-        exit(1);
-    }
 }
 
 int handshake(int sockfd){
