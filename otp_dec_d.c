@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * otp_dec_d.c 
+ *
+ * Author: Gregory Mankes
+ * Takes a file sent over a socket, sends it back to the client decrypted
+ ******************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -95,10 +101,17 @@ void listen_socket(int sockfd){
 	}
 }
 
-
+/*******************************************************************************
+ * void send_file(int, char *, int)
+ *
+ * Sends a file over a socket
+ * Args: a socket file descriptor, a string and the length of the string
+ ******************************************************************************/
 void send_file(int new_fd, const char * message, int message_length){
+	// keep track of the loop var and the bytes wrote
 	int nwrote = 0;
 	int i = 0;
+	// begin sending the file back
 	for (; i < message_length; i+=nwrote){
 		nwrote = write(new_fd, message, message + i);
 		if(nwrote < 0){
@@ -106,26 +119,44 @@ void send_file(int new_fd, const char * message, int message_length){
 			_Exit(2);
 		}
 	}
+	// receive the done response
 	char buff[20];
 	memset(buff, 0, sizeof(buff));
 	recv(new_fd, buff, sizeof(buff), 0);
 }
 
+/*******************************************************************************
+ * int handshake(int)
+ *
+ * Completes a handshake with a client of the same type
+ * Args: a socket file descriptor
+ ******************************************************************************/
 int handshake(int new_fd){
 	char buffer[20];
 	memset(buffer, 0, sizeof(buffer));
+	// receive the name of the client
 	recv(new_fd, buffer, sizeof(buffer),0);
+	// accept clients of the same type
 	if(strcmp(buffer, "opt_dec") == 0){
 		return 1;
 	}
 	return 0;
 }
 
+/*******************************************************************************
+ * char * recv_file(int, int)
+ *
+ * Receives a file of a specified size and returns its contents in a string
+ * Args: a socket file descriptor and a message length
+ ******************************************************************************/
 char * recv_file(int new_fd, int message_length){
+	// keep track of the loop var and bytes read
 	int nread = 0;
 	int i = 0;
+	// allocate a string for the file
 	char * to_receive = malloc(message_length * sizeof(char));
 	memset(to_receive, '\0', sizeof(to_receive));
+	// begin receiving the file
 	for(; i< message_length; i+= nread){
 		nread = read(new_fd, to_receive + i, message_length -i);
 		if(nread < 0){
@@ -139,7 +170,13 @@ char * recv_file(int new_fd, int message_length){
 	return to_receive;
 }
 
-void encrypt_message(char * message, char * key, int message_length){
+/*******************************************************************************
+ * void decrypt_message(char *, char *, int)
+ *
+ * decrypts a file with a specified key
+ * Args: the file as a string, the key, and the message length
+ ******************************************************************************/
+void decrypt_message(char * message, char * key, int message_length){
 	int i = 0;
 	int message_num;
 	int key_num;
@@ -208,7 +245,7 @@ void handle_request(int new_fd){
 	char * message = recv_file(new_fd, message_length);
 	// get the key
 	char * key = recv_file(new_fd, key_length);
-	encrypt_message(message, key, message_length);
+	decrypt_message(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
@@ -281,11 +318,17 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	printf("Server open on port %s\n", argv[1]);
+	// create address info with the port number
 	struct addrinfo * res = create_address_info(argv[1]);
+	// create socket with this address info
 	int sockfd = create_socket(res);
+	// bind this socket to the port
 	bind_socket(sockfd, res);
+	// listen on the port
    	listen_socket(sockfd);
+	// wait for up to 5 incoming connections
 	wait_for_connection(sockfd);
+	// clean up
 	freeaddrinfo(res);
 }
 
