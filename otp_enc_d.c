@@ -36,6 +36,7 @@ struct addrinfo * create_address_info(char * port){
 	return res;
 }
 
+
 /*******************************************************************************
  * int create_socket(struct addrinfo *)
  * 
@@ -105,13 +106,13 @@ void send_file(int new_fd, const char * message, int message_length){
 			_Exit(2);
 		}
 	}
-	char buff[100];
+	char buff[20];
 	memset(buff, 0, sizeof(buff));
 	recv(new_fd, buff, sizeof(buff), 0);
 }
 
 int handshake(int new_fd){
-	char buffer[100];
+	char buffer[20];
 	memset(buffer, 0, sizeof(buffer));
 	recv(new_fd, buffer, sizeof(buffer),0);
 	if(strcmp(buffer, "opt_enc") == 0){
@@ -205,7 +206,7 @@ void handle_request(int new_fd){
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
 	char * message = recv_file(new_fd, message_length);
-	printf("%s\n", message);
+	printf("%s", message);
 	// get the key
 	char * key = recv_file(new_fd, key_length);
 	sleep(1);
@@ -282,11 +283,26 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	printf("Server open on port %s\n", argv[1]);
-	struct addrinfo * res = create_address_info(argv[1]);
-	int sockfd = create_socket(res);
-	bind_socket(sockfd, res);
+	//struct addrinfo * res = create_address_info(argv[1]);
+	int portnum = atoi(argv[1]);
+
+	struct sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(portnum);
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        fprintf(stderr, "Error in creating socket\n");
+        exit(1);
+	}
+	//int sockfd = create_socket(res);
+	//bind_socket(sockfd, res);
+	if ( bind(sockfd, (struct sockaddr*) &server, sizeof(server)) < 0 ) {
+        perror("bind");
+        exit(1);
+	}
 	listen_socket(sockfd);
 	wait_for_connection(sockfd);
-	freeaddrinfo(res);
+	//	freeaddrinfo(res);
 }
 
