@@ -109,7 +109,7 @@ char * recv_file(int new_fd, int message_length){
 	int i = 0;
 	//printf("Receiving the file\n");
 	for(; i< message_length; i+= nread){
-		nread = read(new_fd, to_receive + i, message_length -1);
+		nread = read(new_fd, to_receive + i, message_length -i);
 		if(nread < 0){
 			fprintf(stderr, "Error in receiving file\n");
 			_Exit(2);

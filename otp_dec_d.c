@@ -126,7 +126,7 @@ void recv_file(int new_fd, int message_length, char * to_receive){
 	int nread = 0;
 	int i = 0;
 	for(; i< message_length; i+= nread){
-		nread = read(new_fd, to_receive + i, message_length -1);
+		nread = read(new_fd, to_receive + i, message_length -i);
 		if(nread < 0){
 			fprintf(stderr, "Error in receiving file\n");
 			_Exit(2);

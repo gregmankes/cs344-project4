@@ -213,8 +213,8 @@ void handle_request(int new_fd){
 	// send back the file
 	send_file(new_fd, message, message_length);
 	// free the key and message
-	//free(message);
-	//free(key);
+	free(message);
+	free(key);
 	exit(0);
 }
 
@@ -282,26 +282,11 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	printf("Server open on port %s\n", argv[1]);
-	//struct addrinfo * res = create_address_info(argv[1]);
-	int portnum = atoi(argv[1]);
-
-	struct sockaddr_in server;
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(portnum);
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        fprintf(stderr, "Error in creating socket\n");
-        exit(1);
-	}
-	//int sockfd = create_socket(res);
-	//bind_socket(sockfd, res);
-	if ( bind(sockfd, (struct sockaddr*) &server, sizeof(server)) < 0 ) {
-        perror("bind");
-        exit(1);
-	}
-	listen_socket(sockfd);
+	struct addrinfo * res = create_address_info(argv[1]);
+	int sockfd = create_socket(res);
+	bind_socket(sockfd, res);
+   	listen_socket(sockfd);
 	wait_for_connection(sockfd);
-	//	freeaddrinfo(res);
+	freeaddrinfo(res);
 }
 
