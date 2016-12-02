@@ -177,8 +177,8 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	send(sockfd, key_length_s, strlen(key_length_s), 0);
 	recv(sockfd, key_length_s, sizeof(key_length_s), 0);
 	// create the key and file strings
-	char * message = malloc((file_length+1) * sizeof(char)+1);
-	char * key = malloc((key_length+1) * sizeof(char));
+	char * message = malloc(file_length * sizeof(char));
+	char * key = malloc(key_length * sizeof(char));
 	memset(message, 0, sizeof(message));
 	memset(key, 0, sizeof(key));
 	//printf("Loading the file into memory\n");

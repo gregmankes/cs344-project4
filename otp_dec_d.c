@@ -208,7 +208,6 @@ void handle_request(int new_fd){
 	char * message = recv_file(new_fd, message_length);
 	// get the key
 	char * key = recv_file(new_fd, key_length);
-	sleep(1);
 	encrypt_message(message, key, message_length);
 	// send back the file
 	send_file(new_fd, message, message_length);
