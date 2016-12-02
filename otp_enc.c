@@ -211,9 +211,6 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "Usage: opt_enc filename keyname portnumber\n");
 		exit(1);
 	}
-	struct addrinfo * res = create_address_info(argv[3]);
-	int sockfd = create_socket(res);
-	connect_socket(sockfd, res);
 	int fd = open(argv[1], O_RDONLY);
 	if(fd < 0){
 		fprintf(stderr, "There was an error opening %s\n", argv[1]);
@@ -228,6 +225,9 @@ int main(int argc, char *argv[]){
 	}
 	check_file_and_get_length(fd);
 	close(fd);
+	struct addrinfo * res = create_address_info(argv[3]);
+	int sockfd = create_socket(res);
+	connect_socket(sockfd, res);
 	handle_request(sockfd, argv[1], argv[2]);
 	freeaddrinfo(res);
 	close(sockfd);
