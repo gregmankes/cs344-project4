@@ -201,9 +201,9 @@ void handle_request(int new_fd){
 	// send the length of the key back
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = (char *)malloc((long)message_length+1);
+	char * message = (char *)malloc((long)message_length);
 	memset(message, '\0', sizeof(message));
-	recv_file(new_fd, message_length+1, message);
+	recv_file(new_fd, message_length, message);
 	// get the key
 	char * key = (char *)malloc((long)key_length);
 	memset(key, '\0', sizeof(key));
