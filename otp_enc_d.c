@@ -5,8 +5,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <arpa/inet.h>
-#include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
@@ -97,7 +95,7 @@ void listen_socket(int sockfd){
 }
 
 
-void send_file(int new_fd, char * message, int message_length){
+void send_file(int new_fd, const char * message, int message_length){
 	int nwrote = 0;
 	int i = 0;
 	for (; i < message_length; i+=nwrote){
@@ -203,8 +201,8 @@ void handle_request(int new_fd){
 	// send the length of the key back
 	send(new_fd, buffer, strlen(buffer),0);
 	// get the message
-	char * message = (char *)malloc((long)message_length);
-	recv_file(new_fd, message_length, message);
+	char * message = (char *)malloc((long)message_length+1);
+	recv_file(new_fd, message_length+1, message);
 	// get the key
 	char * key = (char *)malloc((long)key_length+1);
 	recv_file(new_fd, key_length+1, key);
