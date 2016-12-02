@@ -3,7 +3,7 @@
  *
  * Author: Gregory Mankes
  * Takes an encoded file, sends it to a given daemon with a key and receives the
- * decoded file back
+ * deccoded file back
  ******************************************************************************/
 #include <stdio.h>
 #include <string.h>
@@ -151,7 +151,7 @@ char * recv_file(int new_fd, int message_length){
 		}
 	}
 	// echo finished response
-	char * finished = "opt_dec_d f";
+	char * finished = "opt_enc_d f";
 	send(new_fd, finished, strlen(finished),0);
 	return to_receive;
 }
@@ -210,6 +210,8 @@ void handle_request(int sockfd, char * filename, char * keyname){
 		fprintf(stderr, "Error: Key is too short\n");
 		exit(1);
 	}
+	close(file_fd);
+	close(key_fd);
 	// tell the daemon the size of the strings
 	char file_length_s[20];
 	memset(file_length_s, 0, sizeof(file_length_s));
@@ -224,16 +226,18 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	send(sockfd, key_length_s, strlen(key_length_s), 0);
 	recv(sockfd, key_length_s, sizeof(key_length_s), 0);
 	// send them
-	send_file(file_fd, sockfd);
-	send_file(key_fd, sockfd);
+	int filefd = open(filename,O_RDONLY);
+	int keyfd = open(keyname, O_RDONLY);
+	send_file(filefd, sockfd);
+	send_file(keyfd, sockfd);
 	// close the files
-	close(file_fd);
-	close(key_fd);
+	close(filefd);
+	close(keyfd);
 	// get the encrypted file back
-	char * decrypted = recv_file(sockfd, file_length);
+	char * encrypted = recv_file(sockfd, file_length);
 	// print it and free the space
-	printf("%s", decrypted);
-	free(decrypted);
+	printf("%s", encrypted);
+	free(encrypted);
 }
 
 /*******************************************************************************

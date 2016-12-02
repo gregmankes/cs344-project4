@@ -210,6 +210,8 @@ void handle_request(int sockfd, char * filename, char * keyname){
 		fprintf(stderr, "Error: Key is too short\n");
 		exit(1);
 	}
+	close(file_fd);
+	close(key_fd);
 	// tell the daemon the size of the strings
 	char file_length_s[20];
 	memset(file_length_s, 0, sizeof(file_length_s));
@@ -224,11 +226,13 @@ void handle_request(int sockfd, char * filename, char * keyname){
 	send(sockfd, key_length_s, strlen(key_length_s), 0);
 	recv(sockfd, key_length_s, sizeof(key_length_s), 0);
 	// send them
-	send_file(file_fd, sockfd);
-	send_file(key_fd, sockfd);
+	int filefd = open(filename,O_RDONLY);
+	int keyfd = open(keyname, O_RDONLY);
+	send_file(filefd, sockfd);
+	send_file(keyfd, sockfd);
 	// close the files
-	close(file_fd);
-	close(key_fd);
+	close(filefd);
+	close(keyfd);
 	// get the encrypted file back
 	char * encrypted = recv_file(sockfd, file_length);
 	// print it and free the space
